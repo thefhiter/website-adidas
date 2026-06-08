@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADIDAS ORIGINALS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="/js/cart.js" defer></script>
+<style>
+/* HOME NAV OVERRIDE — transparent on hero */
+.top-nav-home{position:fixed;top:0;left:0;right:0;z-index:200;height:68px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;background:transparent}
+.top-nav-home .nav-brand{display:flex;align-items:center;gap:12px;opacity:.95}
+.top-nav-home .nav-word{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:8px;color:#fff}
+.top-nav-home nav a{color:rgba(255,255,255,.5);text-decoration:none;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-left:28px;transition:color .3s}
+.top-nav-home nav a:hover{color:#fff}
+.top-nav-home .nav-cta{border:1px solid rgba(255,255,255,.3);padding:8px 20px;transition:all .3s}
+.top-nav-home .nav-cta:hover{background:rgba(255,255,255,.08);border-color:#fff;color:#fff}
+.home-cart-btn{position:relative;padding:8px;display:flex;align-items:center;color:rgba(255,255,255,.5)}
+.home-cart-btn:hover{color:#fff}
+.home-cart-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:#fff;color:#000;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;opacity:0;transition:opacity .3s}
+.home-cart-count.has-items{opacity:1}
+</style>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#050507;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;height:100vh;width:100vw;cursor:none}
+
+/* VAPOR CANVAS */
+#vc{position:fixed;inset:0;z-index:3;pointer-events:none}
+
+/* SPOTLIGHT CONE */
+.cone{
+  position:fixed;top:0;left:50%;transform:translateX(-50%);
+  width:360px;height:70vh;
+  clip-path:polygon(32% 0%,68% 0%,100% 100%,0% 100%);
+  z-index:2;pointer-events:none;
+  transition:background 1.6s ease;
+  filter:blur(18px);
+}
+/* SOFT HALO around jacket */
+.halo{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-55%);
+  width:500px;height:500px;border-radius:50%;
+  z-index:2;pointer-events:none;
+  filter:blur(80px);
+  transition:background 1.6s ease;
+  opacity:.18;
+}
+
+/* AMBIENT */
+.amb{position:fixed;inset:0;z-index:0;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(140px);opacity:.13;transition:background 1.8s ease}
+.blob-a{width:750px;height:750px;top:-200px;left:-200px}
+.blob-b{width:650px;height:650px;bottom:-200px;right:-200px}
+
+/* GRAIN */
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* HEADER */
+header{position:fixed;top:0;left:0;right:0;z-index:50;padding:26px 48px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-word{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:8px;opacity:.9}
+nav a{color:rgba(255,255,255,.5);text-decoration:none;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;margin-left:28px;transition:color .3s}
+nav a:hover{color:#fff}
+.nav-cta{border:1px solid rgba(255,255,255,.3);padding:8px 20px;transition:all .3s}
+.nav-cta:hover{background:rgba(255,255,255,.08);border-color:#fff;color:#fff}
+
+/* STAGE with perspective */
+.stage{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;perspective:1400px;perspective-origin:50% 48%}
+
+/* PRODUCT */
+.product{
+  position:absolute;
+  display:flex;flex-direction:column;align-items:center;
+  opacity:0;
+  transform-style:preserve-3d;
+  will-change:transform,opacity;
+}
+
+/* GROUND GLOW oval */
+.ground{
+  width:260px;height:22px;border-radius:50%;
+  filter:blur(18px);opacity:.55;
+  margin-top:-16px;
+  transition:background 1.5s ease;
+}
+
+/* JACKET */
+.jacket{width:min(300px,48vw);filter:drop-shadow(0 20px 60px rgba(0,0,0,.9))}
+
+/* REFLECTION */
+.refl{
+  width:min(300px,48vw);
+  transform:scaleY(-1);
+  opacity:.1;
+  -webkit-mask:linear-gradient(to top,rgba(0,0,0,.5) 0%,transparent 50%);
+  mask:linear-gradient(to top,rgba(0,0,0,.5) 0%,transparent 50%);
+  margin-top:-6px;
+  pointer-events:none;
+}
+
+/* INFO */
+.info{position:fixed;bottom:88px;left:48px;z-index:50;max-width:500px}
+.info-cat{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:10px}
+.info-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,7.5vw,92px);line-height:.9;letter-spacing:1px}
+.info-price{font-size:17px;font-weight:300;margin-top:16px;color:rgba(255,255,255,.6);letter-spacing:1px}
+
+/* ACTIONS */
+.actions{position:fixed;bottom:88px;right:48px;z-index:50;display:flex;flex-direction:column;gap:12px;align-items:flex-end}
+.btn{display:inline-block;padding:13px 34px;font-size:11px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;cursor:none;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-p{background:#fff;color:#050507;font-weight:500}
+.btn-p:hover{background:rgba(255,255,255,.85)}
+.btn-s{border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.6)}
+.btn-s:hover{border-color:rgba(255,255,255,.7);color:#fff}
+
+/* DOTS */
+.progress{position:fixed;right:48px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:10px}
+.dot{width:3px;height:3px;border-radius:2px;background:rgba(255,255,255,.25);transition:height .5s cubic-bezier(.77,0,.175,1),background .5s}
+.dot.active{height:28px;background:#fff}
+
+/* COUNTER */
+.ctr{position:fixed;left:48px;top:50%;transform:translateY(-50%);z-index:50;writing-mode:vertical-rl;display:flex;gap:22px;align-items:center}
+.ctr-n{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:rgba(255,255,255,.32)}
+.ctr-l{width:1px;height:38px;background:rgba(255,255,255,.13)}
+
+/* SCROLL HINT */
+.sh{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;align-items:center;gap:10px}
+.sh span{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.28)}
+.sh-line{width:1px;height:42px;background:rgba(255,255,255,.13);overflow:hidden;position:relative}
+.sh-line::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:100%;background:rgba(255,255,255,.5);animation:sd 1.8s ease-in-out infinite}
+@keyframes sd{0%{top:-100%}100%{top:100%}}
+
+/* CURSOR */
+.cur{position:fixed;width:34px;height:34px;border:1px solid rgba(255,255,255,.4);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .3s,height .3s}
+.cur-dot{position:fixed;width:4px;height:4px;background:#fff;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+
+.coll{position:fixed;top:50%;right:96px;z-index:50;writing-mode:vertical-rl;font-size:9px;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,.16);transform:translateY(-50%)}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-dot" id="curDot"></div>
+
+<!-- HOME NAV -->
+<nav class="top-nav-home">
+  <a href="/index.html" class="nav-brand" style="text-decoration:none;color:#fff">
+    <svg width="42" height="34" viewBox="0 0 42 34" fill="none">
+      <path d="M21 0L42 34H0L21 0Z" fill="white"/>
+      <rect x="11" y="15" width="20" height="4" rx=".7" fill="#050507"/>
+      <rect x="8"  y="22" width="26" height="4" rx=".7" fill="#050507"/>
+      <rect x="5"  y="29" width="32" height="4" rx=".7" fill="#050507"/>
+    </svg>
+    <span class="nav-word">ADIDAS</span>
+  </a>
+  <nav>
+    <a href="/men.html">Men</a>
+    <a href="/women.html">Women</a>
+    <a href="/originals.html">Originals</a>
+    <a href="/collection.html" class="nav-cta">Shop Collection</a>
+  </nav>
+  <a href="/bag.html" class="home-cart-btn" style="text-decoration:none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+      <path d="M16 10a4 4 0 01-8 0"/>
+    </svg>
+    <span class="home-cart-count" id="cartCount">0</span>
+  </a>
+</nav>
+
+<canvas id="vc"></canvas>
+<div class="cone" id="cone"></div>
+<div class="halo" id="halo"></div>
+
+<div class="amb">
+  <div class="blob blob-a" id="bA"></div>
+  <div class="blob blob-b" id="bB"></div>
+</div>
+<div class="grain"></div>
+
+<header>
+  <div class="brand">
+    <svg width="50" height="40" viewBox="0 0 50 40" fill="none">
+      <path d="M25 0L50 40H0L25 0Z" fill="white"/>
+      <rect x="13" y="19" width="24" height="4.5" rx=".8" fill="#050507"/>
+      <rect x="9"  y="27" width="32" height="4.5" rx=".8" fill="#050507"/>
+      <rect x="5"  y="35" width="40" height="4.5" rx=".8" fill="#050507"/>
+    </svg>
+    <span class="brand-word">ADIDAS</span>
+  </div>
+  <nav>
+    <a href="#">Men</a>
+    <a href="#">Women</a>
+    <a href="#">Originals</a>
+    <a href="#" class="nav-cta">Shop Collection</a>
+  </nav>
+</header>
+
+<div class="stage" id="stage"></div>
+
+<div class="info">
+  <div class="info-cat" id="iCat"></div>
+  <div class="info-name" id="iName"></div>
+  <div class="info-price" id="iPrice"></div>
+</div>
+
+<div class="actions">
+  <a href="#" class="btn btn-p">Add to Bag</a>
+  <a href="#" class="btn btn-s">View Details</a>
+</div>
+
+<div class="progress" id="pg"></div>
+
+<div class="ctr">
+  <span class="ctr-n" id="cL">01</span>
+  <div class="ctr-l"></div>
+  <span class="ctr-n" id="cR">05</span>
+</div>
+
+<div class="coll">Heritage Collection SS26</div>
+
+<div class="sh" id="sh">
+  <span>Scroll</span>
+  <div class="sh-line"></div>
+</div>
+
+<script>
+/* ═══ DATA ═══ */
+const P = [
+  {
+    name:"SST TRACK\nJACKET", cat:"Adidas Originals — Heritage", price:"$90.00",
+    body:"#1c1c1e", bodyL:"#303032", stripe:"#ffffff", collar:"#111",
+    glow:"#cc0022", glowB:"#ff4000",
+    cone:"rgba(255,60,40,0.10)", halo:"#c8002d",
+    vap:[220,30,50]
+  },
+  {
+    name:"FIREBIRD\nTRACK TOP", cat:"Adidas Originals — Icons", price:"$110.00",
+    body:"#5c0000", bodyL:"#8a0000", stripe:"#ffffff", collar:"#3a0000",
+    glow:"#ff1100", glowB:"#600000",
+    cone:"rgba(255,50,0,0.10)", halo:"#ee2200",
+    vap:[255,55,0]
+  },
+  {
+    name:"BECKENBAUER\nTRACK JACKET", cat:"Adidas Originals — Archive", price:"$120.00",
+    body:"#cccccc", bodyL:"#eeeeee", stripe:"#111111", collar:"#999",
+    glow:"#888888", glowB:"#333333",
+    cone:"rgba(220,220,255,0.07)", halo:"#aaaaaa",
+    vap:[200,200,220]
+  },
+  {
+    name:"ARCHIVE\nTRACK TOP", cat:"Adidas Performance — Sport", price:"$95.00",
+    body:"#001a54", bodyL:"#002888", stripe:"#ffd700", collar:"#001038",
+    glow:"#0033cc", glowB:"#ffaa00",
+    cone:"rgba(0,100,255,0.10)", halo:"#0044ee",
+    vap:[0,90,255]
+  },
+  {
+    name:"JAMAICA\nTRACK JACKET", cat:"Adidas Originals — Nations", price:"$105.00",
+    body:"#003d1a", bodyL:"#005828", stripe:"#ffd700", collar:"#002410",
+    glow:"#007730", glowB:"#ccaa00",
+    cone:"rgba(0,180,70,0.09)", halo:"#009940",
+    vap:[0,180,70]
+  }
+];
+
+/* ═══ SVG JACKET ═══ */
+function dk(hex,a){
+  const n=parseInt(hex.replace('#',''),16);
+  return '#'+[n>>16,(n>>8)&255,n&255].map(c=>Math.max(0,c-a).toString(16).padStart(2,'0')).join('');
+}
+
+function svg(p,i){
+  const b=p.body,bl=p.bodyL,s=p.stripe,c=p.collar;
+  return `<svg viewBox="0 0 300 380" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg${i}" x1="15%" y1="0%" x2="85%" y2="100%">
+  <stop offset="0%" stop-color="${bl}"/>
+  <stop offset="50%" stop-color="${b}"/>
+  <stop offset="100%" stop-color="${dk(b,24)}"/>
+</linearGradient>
+<linearGradient id="hl${i}" x1="0%" y1="0%" x2="0%" y2="100%">
+  <stop offset="0%" stop-color="${bl}" stop-opacity=".8"/>
+  <stop offset="100%" stop-color="${bl}" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="sl${i}" x1="0%" y1="0%" x2="0%" y2="100%">
+  <stop offset="0%" stop-color="${s}" stop-opacity=".95"/>
+  <stop offset="100%" stop-color="${s}" stop-opacity=".55"/>
+</linearGradient>
+<filter id="sh${i}" x="-30%" y="-20%" width="160%" height="150%">
+  <feDropShadow dx="0" dy="28" stdDeviation="26" flood-color="#000" flood-opacity=".85"/>
+  <feDropShadow dx="0" dy="6"  stdDeviation="8"  flood-color="#000" flood-opacity=".5"/>
+</filter>
+</defs>
+<!-- left sleeve -->
+<path d="M62,92 L8,250 L54,264 L80,126" fill="url(#bg${i})" filter="url(#sh${i})"/>
+<path d="M62,92 L44,168 L80,126" fill="${bl}" opacity=".28"/>
+<line x1="16" y1="148" x2="52" y2="155" stroke="url(#sl${i})" stroke-width="7" stroke-linecap="round"/>
+<line x1="12" y1="168" x2="48" y2="175" stroke="url(#sl${i})" stroke-width="7" stroke-linecap="round"/>
+<line x1="8"  y1="188" x2="44" y2="195" stroke="url(#sl${i})" stroke-width="7" stroke-linecap="round"/>
+<!-- right sleeve -->
+<path d="M238,92 L292,250 L246,264 L220,126" fill="url(#bg${i})" filter="url(#sh${i})"/>
+<path d="M238,92 L256,168 L220,126" fill="${bl}" opacity=".28"/>
+<line x1="284" y1="148" x2="248" y2="155" stroke="url(#sl${i})" stroke-width="7" stroke-linecap="round"/>
+<line x1="288" y1="168" x2="252" y2="175" stroke="url(#sl${i})" stroke-width="7" stroke-linecap="round"/>
+<line x1="292" y1="188" x2="256" y2="195" stroke="url(#sl${i})" stroke-width="7" stroke-linecap="round"/>
+<!-- body -->
+<path d="M80,126 L54,264 L246,264 L220,126 L208,52 L176,26 L150,106 L124,26 L92,52 Z" fill="url(#bg${i})" filter="url(#sh${i})"/>
+<!-- highlights -->
+<path d="M92,52 L80,126 L106,130 L124,56 Z" fill="${bl}" opacity=".22"/>
+<path d="M128,52 L150,106 L172,52 L150,36 Z" fill="${bl}" opacity=".44"/>
+<path d="M208,52 L220,126 L194,130 L176,56 Z" fill="rgba(0,0,0,.15)"/>
+<path d="M106,130 L150,106 L148,264 L54,264 Z" fill="url(#hl${i})" opacity=".07"/>
+<!-- collar -->
+<path d="M124,26 L150,106 L176,26 L164,12 L150,18 L136,12 Z" fill="${c}"/>
+<path d="M136,12 L150,18 L164,12 L150,6 Z" fill="${bl}" opacity=".32"/>
+<!-- zip -->
+<line x1="150" y1="106" x2="150" y2="264" stroke="${c}" stroke-width="2.5" opacity=".5"/>
+<rect x="145" y="110" width="10" height="7" rx="1.5" fill="${s}" opacity=".72"/>
+<!-- pockets -->
+<line x1="86" y1="204" x2="132" y2="204" stroke="${s}" stroke-width="1.5" stroke-linecap="round" opacity=".32"/>
+<line x1="168" y1="204" x2="214" y2="204" stroke="${s}" stroke-width="1.5" stroke-linecap="round" opacity=".32"/>
+<!-- chest text -->
+<text x="150" y="170" text-anchor="middle" fill="${s}" opacity=".2" font-family="Arial Black,sans-serif" font-size="8.5" letter-spacing="5" font-weight="900">ADIDAS</text>
+<!-- hem -->
+<line x1="54" y1="264" x2="246" y2="264" stroke="${s}" stroke-width="2" opacity=".2"/>
+</svg>`;
+}
+
+/* ═══ BUILD DOM ═══ */
+const stage = document.getElementById('stage');
+const cards = P.map((p,i) => {
+  const div = document.createElement('div');
+  div.className = 'product';
+
+  const s = svg(p,i);
+  div.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center">
+      <div class="jacket" style="line-height:0">${s}</div>
+      <div class="refl" style="line-height:0">${s}</div>
+      <div class="ground" id="grd${i}" style="background:${p.glow}"></div>
+    </div>`;
+  stage.appendChild(div);
+  return div;
+});
+
+const pgEl = document.getElementById('pg');
+const dots = P.map((_,i)=>{
+  const d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  pgEl.appendChild(d);
+  return d;
+});
+
+/* ═══ VAPOR CANVAS ═══ */
+const vc = document.getElementById('vc');
+const cx = vc.getContext('2d');
+vc.width  = window.innerWidth;
+vc.height = window.innerHeight;
+window.addEventListener('resize',()=>{vc.width=window.innerWidth;vc.height=window.innerHeight});
+
+let vapColor = P[0].vap;
+const pts = [];
+
+class Puff {
+  constructor(){
+    const w=window.innerWidth, h=window.innerHeight;
+    this.x = w/2 + (Math.random()-.5)*110;
+    this.y = h/2 + 90 + Math.random()*30;
+    this.r = Math.random()*30+14;
+    this.op = Math.random()*.14+.04;
+    this.vx = (Math.random()-.5)*.55;
+    this.vy = -(Math.random()*1.1+.35);
+    this.life = 0;
+    this.max  = Math.random()*130+80;
+    this.col  = [...vapColor];
+  }
+  step(){this.x+=this.vx;this.y+=this.vy;this.vx+=(Math.random()-.5)*.04;this.r+=.35;this.life++}
+  alpha(){const t=this.life/this.max;return this.op*Math.sin(t*Math.PI)*(1-t*.4)}
+  draw(c){
+    const[r,g,b]=this.col,a=this.alpha();
+    const g2=c.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);
+    g2.addColorStop(0,`rgba(${r},${g},${b},${a})`);
+    g2.addColorStop(.5,`rgba(${r},${g},${b},${a*.35})`);
+    g2.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    c.beginPath();c.arc(this.x,this.y,this.r,0,Math.PI*2);c.fillStyle=g2;c.fill();
+  }
+  get dead(){return this.life>=this.max}
+}
+
+(function loop(){
+  cx.clearRect(0,0,vc.width,vc.height);
+  if(Math.random()<.42) pts.push(new Puff());
+  for(let i=pts.length-1;i>=0;i--){
+    pts[i].step();pts[i].draw(cx);
+    if(pts[i].dead) pts.splice(i,1);
+  }
+  requestAnimationFrame(loop);
+})();
+
+/* ═══ STATE ═══ */
+let cur=0, busy=false, floater=null;
+
+/* ═══ AMBIENT ═══ */
+function setVibe(p){
+  document.getElementById('bA').style.background = p.glow;
+  document.getElementById('bB').style.background = p.glowB;
+  document.getElementById('cone').style.background =
+    `linear-gradient(to bottom,${p.cone.replace('0.10','0.18')},${p.cone},transparent 85%)`;
+  document.getElementById('halo').style.background = p.halo;
+  vapColor = p.vap;
+  pts.forEach(pt=>{ setTimeout(()=>{pt.col=[...p.vap]}, Math.random()*800); });
+}
+
+/* ═══ INFO ═══ */
+function setInfo(p,i){
+  gsap.to(['#iCat','#iName','#iPrice'],{opacity:0,y:-12,stagger:.04,duration:.22,ease:'power2.in',
+    onComplete(){
+      document.getElementById('iCat').textContent  = p.cat;
+      document.getElementById('iName').innerHTML   = p.name.replace('\n','<br>');
+      document.getElementById('iPrice').textContent= p.price;
+      document.getElementById('cL').textContent    = String(i+1).padStart(2,'0');
+      gsap.to(['#iCat','#iName','#iPrice'],{opacity:1,y:0,stagger:.06,duration:.42,ease:'power3.out'});
+    }
+  });
+}
+
+/* ═══ FLOAT ═══ */
+function startFloat(el){
+  if(floater) floater.kill();
+  floater = gsap.to(el,{
+    y:-16, rotationX:4, rotationZ:.6,
+    duration:3.4, ease:'sine.inOut',
+    yoyo:true, repeat:-1,
+    transformOrigin:'center center'
+  });
+}
+
+/* ═══ GO TO ═══ */
+function goTo(next,dir){
+  if(busy||next===cur||next<0||next>=P.length) return;
+  busy=true;
+  const prev=cur; cur=next;
+  dots[prev].classList.remove('active');
+  dots[next].classList.add('active');
+  setVibe(P[next]);
+  setInfo(P[next],next);
+  if(next>0) gsap.to('#sh',{opacity:0,duration:.6});
+
+  if(floater) floater.kill();
+  gsap.to(cards[prev],{y:0,rotationX:0,rotationZ:0,duration:.25,overwrite:true});
+
+  /* 3D flip OUT */
+  gsap.to(cards[prev],{
+    rotationY: dir*-90,
+    x: dir*-160,
+    z:-350,
+    opacity:0,
+    scale:.6,
+    duration:.88,
+    ease:'power3.inOut'
+  });
+
+  /* 3D flip IN */
+  gsap.fromTo(cards[next],
+    {rotationY:dir*90, x:dir*160, z:-350, opacity:0, scale:.6},
+    {rotationY:0, x:0, z:0, opacity:1, scale:1,
+     duration:.88, ease:'power3.inOut',
+     onComplete(){busy=false; startFloat(cards[next]);}
+    }
+  );
+}
+
+/* ═══ INIT ═══ */
+gsap.set(cards[0],{opacity:1,scale:1,x:0,rotationY:0,z:0});
+setVibe(P[0]);
+document.getElementById('iCat').textContent  = P[0].cat;
+document.getElementById('iName').innerHTML   = P[0].name.replace('\n','<br>');
+document.getElementById('iPrice').textContent= P[0].price;
+document.getElementById('cR').textContent    = String(P.length).padStart(2,'0');
+
+/* intro */
+gsap.fromTo(cards[0],{y:70,opacity:0,rotationX:15,rotationY:-12},
+  {y:0,opacity:1,rotationX:0,rotationY:0,duration:1.4,ease:'power3.out',delay:.35,
+   onComplete:()=>startFloat(cards[0])});
+gsap.from('.info',  {x:-50,opacity:0,duration:1.1,ease:'power3.out',delay:.65});
+gsap.from('.actions',{x:50,opacity:0,duration:1.1,ease:'power3.out',delay:.75});
+gsap.from('header', {y:-28,opacity:0,duration:.9,ease:'power3.out',delay:.2});
+
+/* ═══ INPUT ═══ */
+let cd=false;
+function thr(fn,d=900){if(cd||busy)return;cd=true;fn();setTimeout(()=>cd=false,d);}
+
+window.addEventListener('wheel',e=>{
+  thr(()=>goTo(cur+(e.deltaY>0?1:-1),e.deltaY>0?1:-1));
+},{passive:true});
+
+let ty=0;
+window.addEventListener('touchstart',e=>{ty=e.touches[0].clientY;},{passive:true});
+window.addEventListener('touchend',e=>{
+  const d=ty-e.changedTouches[0].clientY;
+  if(Math.abs(d)>40) thr(()=>goTo(cur+(d>0?1:-1),d>0?1:-1));
+},{passive:true});
+
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='ArrowRight') thr(()=>goTo(cur+1,1));
+  if(e.key==='ArrowUp'||e.key==='ArrowLeft')   thr(()=>goTo(cur-1,-1));
+});
+
+/* ═══ CURSOR ═══ */
+const cEl=document.getElementById('cur'),dEl=document.getElementById('curDot');
+document.addEventListener('mousemove',e=>{
+  gsap.to(cEl,{x:e.clientX,y:e.clientY,duration:.12,ease:'power2.out'});
+  gsap.to(dEl,{x:e.clientX,y:e.clientY,duration:.04});
+});
+document.querySelectorAll('a,.btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>gsap.to(cEl,{width:54,height:54,duration:.3}));
+  el.addEventListener('mouseleave',()=>gsap.to(cEl,{width:34,height:34,duration:.3}));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+============================================================
+  ADIDAS STORE  -  How to run on this PC (localhost)
+============================================================
+
+REQUIREMENT (one time):
+  Install Node.js from  https://nodejs.org  (the LTS version).
+  Nothing else to install - no "npm install" needed, this app
+  uses only built-in Node modules.
+
+TO OPEN THE STORE:
+  Double-click  START.bat
+  Your browser opens automatically at  http://localhost:3000
+  Keep the black window open while you use the site.
+  Close that window to stop the server.
+
+TO OPEN THE ADMIN DASHBOARD:
+  Double-click  DASHBOARD.bat
+  It opens        http://localhost:3000/admin.html
+  Default password: adidas-admin
+  (change it in data/settings.json, key "adminPassword")
+
+  IMPORTANT: run EITHER START.bat OR DASHBOARD.bat at a time,
+  not both (they use the same port 3000). With either one
+  running you can also just type the other URL in your browser.
+
+OPTIONAL - AI smart search:
+  The site works fully without it (uses local search instead).
+  To enable Claude-powered search, set an environment variable
+  ANTHROPIC_API_KEY before launching, e.g. in a terminal:
+        set ANTHROPIC_API_KEY=sk-ant-your-key
+        node server.js
+
+WHAT'S INSIDE:
+  server.js      the whole backend (pure Node, no dependencies)
+  index.html     the storefront page
+  public/        images, styles, scripts
+  data/          products, orders, customers (your live data)
+  package.json   project info
+
+CHANGE THE PORT:
+  Default is 3000. To use another:
+        set PORT=8080
+        node server.js
+============================================================
